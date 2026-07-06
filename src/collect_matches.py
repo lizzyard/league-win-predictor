@@ -9,15 +9,63 @@ API_KEY = os.getenv("RIOT_API_KEY")
 if API_KEY is None:
     raise ValueError("RIOT_API_KEY not found. Check your .env file.")
 
-print("API Key loaded succesfully.")
-
 headers = {
     "X-Riot-Token": API_KEY
 }
 
-url = "https://na1.api.riotgames.com/lol/status/v4/platform-data"
 
-response = requests.get(url, headers=headers)
+def get_puuid(game_name, tag_line):
+    url = (
+        f"https://americas.api.riotgames.com/"
+        f"riot/account/v1/accounts/by-riot-id/"
+        f"{game_name}/{tag_line}"
+    )
 
-print("Status code:", response.status_code)
-print(response.json())
+    response = requests.get(url, headers=headers)
+
+    print("Status code:", response.status_code)
+    print(response.json())
+
+    data = response.json()
+    return data["puuid"]
+
+def get_match_ids(puuid, count=5):
+    url = (
+        f"https://americas.api.riotgames.com/"
+        f"lol/match/v5/matches/by-puuid/"
+        f"{puuid}/ids"
+        f"?start=0&count={count}"
+    )
+    response = requests.get(url, headers=headers)
+    print("Match IDs status code:", response.status_code)
+    print(response.json())
+
+    return response.json()
+
+def get_match_data(match_id):
+    url = (
+        f"https://americas.api.riotgames.com/"
+        f"lol/match/v5/matches/"
+        f"{match_id}"
+    )
+
+    response = requests.get(url, headers=headers)
+
+    print("Match data status code:", response.status_code)
+    return response.json()
+
+# example
+puuid = get_puuid("ZOMBIE", "十十十")
+match_ids = get_match_ids(puuid)
+print("PUUID:", puuid)
+print("Match IDs:")
+print(match_ids)
+
+first_match_id = match_ids[0]
+match_data = get_match_data(first_match_id)
+
+print(match_data.keys())
+
+print("Game mode:", match_data["info"]["gameMode"])
+print("Game duration:", match_data["info"]["gameDuration"])
+print("Queue ID:", match_data["info"]["queueId"])
