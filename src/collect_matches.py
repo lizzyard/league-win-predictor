@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -54,6 +55,15 @@ def get_match_data(match_id):
     print("Match data status code:", response.status_code)
     return response.json()
 
+def save_match_data(match_id, match_data):
+    file_path = f"data/raw/{match_id}.json"
+
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(match_data, file, indent=4)
+
+    print(f"Saved match data to {file_path}")
+
+
 # example
 puuid = get_puuid("ZOMBIE", "十十十")
 match_ids = get_match_ids(puuid)
@@ -61,11 +71,33 @@ print("PUUID:", puuid)
 print("Match IDs:")
 print(match_ids)
 
-first_match_id = match_ids[0]
-match_data = get_match_data(first_match_id)
+for match_id in match_ids:
+    print(f"Downloading {match_id}...")
+
+    match_data = get_match_data(match_id)
+    save_match_data(match_id, match_data)
+
+
 
 print(match_data.keys())
 
+print("Info keys:", match_data["info"].keys())
 print("Game mode:", match_data["info"]["gameMode"])
 print("Game duration:", match_data["info"]["gameDuration"])
 print("Queue ID:", match_data["info"]["queueId"])
+
+participants = match_data["info"]["participants"]
+
+
+for player in participants:
+    print(
+        player["riotIdGameName"],
+        player["championName"],
+        "Kills:", player["kills"],
+        "Deaths:", player["deaths"],
+        "Assists:", player["assists"],
+        "Gold:", player["goldEarned"],
+        "CS:", player["totalMinionsKilled"] + player["neutralMinionsKilled"],
+        "Won:", player["win"]
+    )
+
