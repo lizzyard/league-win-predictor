@@ -72,7 +72,7 @@ def download_matches(match_ids):
 
 # example
 puuid = get_puuid("ZOMBIE", "十十十")
-match_ids = get_match_ids(puuid)
+match_ids = get_match_ids(puuid, count=50)
 
 download_matches(match_ids)
 
