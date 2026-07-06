@@ -53,6 +53,30 @@ def extract_team_features(match_data):
         teams[team_id]["win"] = player["win"]
     return list(teams.values())
 
+def calculate_differences(team_rows):
+    blue = team_rows[0]
+    red = team_rows[1]
+    return [
+        {
+            "match_id": blue["match_id"],
+            "team_id": 100,
+            "gold_diff": blue["total_gold"] - red["total_gold"],
+            "kill_diff": blue["kills"] - red["kills"],
+            "cs_diff": blue["cs"] - red["cs"],
+            "vision_diff": blue["vision_score"] - red["vision_score"],
+            "win": blue["win"],
+        },
+        {
+            "match_id": red["match_id"],
+            "team_id": 200,
+            "gold_diff": red["total_gold"] - blue["total_gold"],
+            "kill_diff": red["kills"] - blue["kills"],
+            "cs_diff": red["cs"] - blue["cs"],
+            "vision_diff": red["vision_score"] - blue["vision_score"],
+            "win": red["win"],
+        },
+    ]
+
 def main():
     all_rows = []
     
@@ -62,7 +86,9 @@ def main():
             match_data = load_match_file(file_path)
 
             team_rows = extract_team_features(match_data)
-            all_rows.extend(team_rows)
+            difference_rows = calculate_differences(team_rows)
+            all_rows.extend(difference_rows)
+
 
     df = pd.DataFrame(all_rows)
     os.makedirs(PROCESSED_DATA_DIR, exist_ok=True)
