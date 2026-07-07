@@ -70,13 +70,30 @@ def download_matches(match_ids):
         match_data = get_match_data(match_id)
         save_match_data(match_id, match_data)
 
-# example
-puuid = get_puuid("ZOMBIE", "十十十")
-match_ids = get_match_ids(puuid, count=50)
-
-download_matches(match_ids)
 
 
+PLAYERS = [
+    ("ZOMBIE","十十十"),
+]
+
+MATCH_COUNT = 50
+
+def main():
+    all_match_ids = set()
+
+    for game_name, tag_line, in PLAYERS:
+        print(f"Getting matches for {game_name}#{tag_line}")
+
+        puuid = get_puuid(game_name,tag_line)
+        match_ids = get_match_ids(puuid, count=MATCH_COUNT)
+
+        for match_id in match_ids:
+            all_match_ids.add(match_id)
+
+    download_matches(list(all_match_ids))
+
+if __name__ == "__main__":
+    main()
 
 
 
