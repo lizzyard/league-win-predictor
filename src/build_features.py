@@ -81,9 +81,13 @@ def main():
     all_rows = []
     
     for file_name in os.listdir(RAW_DATA_DIR):
-        if file_name.endswith(".json"):
+        if file_name.endswith(".json") and not file_name.endswith("_timeline.json"):
             file_path = os.path.join(RAW_DATA_DIR, file_name)
             match_data = load_match_file(file_path)
+
+            if "info" not in match_data:
+                print(f"Skipping invalid file: {file_name}")
+                continue
 
             team_rows = extract_team_features(match_data)
             difference_rows = calculate_differences(team_rows)

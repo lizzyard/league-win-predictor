@@ -2,6 +2,8 @@ import os
 import requests
 from dotenv import load_dotenv
 import json
+import time
+
 
 load_dotenv()
 
@@ -22,26 +24,17 @@ def get_puuid(game_name, tag_line):
         f"{game_name}/{tag_line}"
     )
 
-    response = requests.get(url, headers=headers)
+    return riot_get(url)["puuid"]
 
-    print("Status code:", response.status_code)
-    print(response.json())
-
-    data = response.json()
-    return data["puuid"]
-
-def get_match_ids(puuid, count=5):
+def get_match_ids(puuid, count=50):
     url = (
         f"https://americas.api.riotgames.com/"
         f"lol/match/v5/matches/by-puuid/"
         f"{puuid}/ids"
         f"?start=0&count={count}"
     )
-    response = requests.get(url, headers=headers)
-    print("Match IDs status code:", response.status_code)
-    print(response.json())
-
-    return response.json()
+    
+    return riot_get(url)
 
 def get_match_data(match_id):
     url = (
@@ -50,10 +43,18 @@ def get_match_data(match_id):
         f"{match_id}"
     )
 
-    response = requests.get(url, headers=headers)
+    return riot_get(url)
 
-    print("Match data status code:", response.status_code)
-    return response.json()
+
+
+def get_match_timeline(match_id):
+    url = (
+        f"https://americas.api.riotgames.com/"
+        f"lol/match/v5/matches/"
+        f"{match_id}/timeline"
+    )
+    
+    return riot_get(url)
 
 def save_match_data(match_id, match_data):
     file_path = f"data/raw/{match_id}.json"
@@ -63,13 +64,39 @@ def save_match_data(match_id, match_data):
 
     print(f"Saved match data to {file_path}")
 
+def save_timeline_data(match_id, timeline_data):
+    file_path = f"data/raw/{match_id}_timeline.json"
+
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(timeline_data, file, indent=4)
+    
+    print(f"Saved timeline data to {file_path}")
+
 def download_matches(match_ids):
     for match_id in match_ids:
         print(f"Downloading {match_id}...")
 
         match_data = get_match_data(match_id)
-        save_match_data(match_id, match_data)
 
+        if match_data is None:
+            continue
+
+    save_match_data(match_id, match_data)
+
+    timeline_data = get_match_timeline(match_id)
+    save_timeline_data(match_id, timeline_data)
+
+def riot_get(url):
+    while True:
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 429:
+            print("Rate limit hit. Waiting 15 seconds...")
+            time.sleep(15)
+            continue
+        if response.status_code != 200:
+            raise Exception(f"Request failed: {response.status_code} {response.json()}")
+        return response.json()
 
 
 PLAYERS = [
