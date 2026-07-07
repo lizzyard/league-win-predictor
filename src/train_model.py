@@ -8,6 +8,9 @@ DATA_FILE = "data/processed/team_features.csv"
 
 df = pd.read_csv(DATA_FILE)
 
+# use only one team per match to avoid train / test leakage 
+df = df[df["team_id"] == 100]
+
 X = df[
     [
         "gold_diff",
