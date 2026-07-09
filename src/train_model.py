@@ -44,6 +44,18 @@ for model_name, model in models.items():
 
     model.fit(X_train, y_train)
 
+    print()
+
+    if hasattr(model, "coef_"):
+        print("Coefficients:")
+        for feature, coefficient in zip(X.columns, model.coef_[0]):
+            print(f"{feature}: {coefficient:.4f}")
+
+    elif hasattr(model, "feature_importances_"):
+        print("Feature Importances:")
+        for feature, importance in zip(X.columns, model.feature_importances_):
+            print(f"{feature}: {importance:.4f}")
+
     predictions = model.predict(X_test)
 
     accuracy = accuracy_score(y_test, predictions)
@@ -57,3 +69,5 @@ for model_name, model in models.items():
     print()
     print("Classification Report:")
     print(classification_report(y_test, predictions))
+
+    
