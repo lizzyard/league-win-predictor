@@ -3,8 +3,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
-DATA_FILE = "data/processed/team_features.csv"
+DATA_FILE = "data/processed/timeline_15_features.csv"
 
 df = pd.read_csv(DATA_FILE)
 
@@ -12,10 +14,9 @@ df = df[df["team_id"] == 100]
 
 X = df[
     [
-        "gold_diff",
-        "kill_diff",
-        "cs_diff",
-        "vision_diff"
+        "gold_diff_15",
+        "xp_diff_15",
+        "cs_diff_15"
     ]
 ]
 
@@ -29,32 +30,30 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-model = LogisticRegression()
-model.fit(X_train, y_train)
-predictions = model.predict(X_test)
-probabilities = model.predict_proba(X_test)
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+}
 
-accuracy = accuracy_score(y_test, predictions)
-print("Accuracy:", accuracy)
+for model_name, model in models.items():
+    print()
+    print("=" * 40)
+    print(model_name)
+    print("=" * 40)
 
-print()
-print("Confusion Matrix:")
-print(confusion_matrix(y_test, predictions))
+    model.fit(X_train, y_train)
 
-print()
-print("Classification Report:")
-print(classification_report(y_test, predictions))
+    predictions = model.predict(X_test)
 
-print()
-print("Feature Importance (Coefficients):")
-for feature, coefficient in zip(X.columns, model.coef_[0]):
-    print(f"{feature}: {coefficient:.4f}")
+    accuracy = accuracy_score(y_test, predictions)
 
-print()
-print("Actual vs Predicted:")
-for actual, prediction, probability in zip(y_test, predictions, probabilities):
-    print(
-        f"Actual: {actual} | "
-        f"Predicted: {prediction} | "
-        f"Win Probability: {probability[1]:.2%}"
-    )
+    print("Accuracy:", accuracy)
+
+    print()
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, predictions))
+
+    print()
+    print("Classification Report:")
+    print(classification_report(y_test, predictions))

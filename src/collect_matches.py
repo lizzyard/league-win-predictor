@@ -57,6 +57,8 @@ def get_match_timeline(match_id):
     return riot_get(url)
 
 def save_match_data(match_id, match_data):
+    os.makedirs("data/raw", exist_ok=True)
+
     file_path = f"data/raw/{match_id}.json"
 
     with open(file_path, "w", encoding="utf-8") as file:
@@ -65,11 +67,13 @@ def save_match_data(match_id, match_data):
     print(f"Saved match data to {file_path}")
 
 def save_timeline_data(match_id, timeline_data):
+    os.makedirs("data/raw", exist_ok=True)
+
     file_path = f"data/raw/{match_id}_timeline.json"
 
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(timeline_data, file, indent=4)
-    
+
     print(f"Saved timeline data to {file_path}")
 
 def download_matches(match_ids):
@@ -81,10 +85,10 @@ def download_matches(match_ids):
         if match_data is None:
             continue
 
-    save_match_data(match_id, match_data)
+        save_match_data(match_id, match_data)
 
-    timeline_data = get_match_timeline(match_id)
-    save_timeline_data(match_id, timeline_data)
+        timeline_data = get_match_timeline(match_id)
+        save_timeline_data(match_id, timeline_data)
 
 def riot_get(url):
     while True:
