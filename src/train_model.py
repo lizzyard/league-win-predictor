@@ -1,11 +1,14 @@
 import pandas as pd
-
+import os
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
+MODEL_DIR = "models"
+MODEL_FILE = "models.win_predictor_15min.pkl"
 DATA_FILE = "data/processed/timeline_15_features.csv"
 
 df = pd.read_csv(DATA_FILE)
@@ -70,4 +73,10 @@ for model_name, model in models.items():
     print("Classification Report:")
     print(classification_report(y_test, predictions))
 
-    
+best_model = LogisticRegression(max_iter=1000)
+best_model.fit(X, y)
+
+os.makedirs(MODEL_DIR, exist_ok=True)
+joblib.dump(best_model, MODEL_FILE)
+
+print(f"Saved model to {MODEL_FILE}")
