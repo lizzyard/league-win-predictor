@@ -81,25 +81,26 @@ def download_matches(match_ids):
         print(f"Downloading {match_id}...")
 
         match_data = get_match_data(match_id)
-
-        if match_data is None:
-            continue
-
         save_match_data(match_id, match_data)
 
         timeline_data = get_match_timeline(match_id)
         save_timeline_data(match_id, timeline_data)
+
+        time.sleep(1)
 
 def riot_get(url):
     while True:
         response = requests.get(url, headers=headers)
 
         if response.status_code == 429:
-            print("Rate limit hit. Waiting 15 seconds...")
-            time.sleep(15)
+            retry_after = int(response.headers.get("Retry-After", 60))
+            print(f"Rate limit hit. Waiting {retry_after} seconds...")
+            time.sleep(retry_after)
             continue
+
         if response.status_code != 200:
             raise Exception(f"Request failed: {response.status_code} {response.json()}")
+
         return response.json()
 
 
