@@ -1,14 +1,13 @@
 import pandas as pd
-import os
-import joblib
+
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier 
 from sklearn.ensemble import RandomForestClassifier
+import os
+import joblib
 
-MODEL_DIR = "models"
-MODEL_FILE = "models.win_predictor_15min.pkl"
 DATA_FILE = "data/processed/timeline_15_features.csv"
 
 df = pd.read_csv(DATA_FILE)
@@ -20,6 +19,7 @@ X = df[
         "gold_diff_15",
         "xp_diff_15",
         "cs_diff_15"
+        
     ]
 ]
 
@@ -50,18 +50,20 @@ for model_name, model in models.items():
     print()
 
     if hasattr(model, "coef_"):
-        print("Coefficients:")
+        print("coefficients:")
         for feature, coefficient in zip(X.columns, model.coef_[0]):
-            print(f"{feature}: {coefficient:.4f}")
+                print(f"{feature}: {coefficient:.4f}")
 
-    elif hasattr(model, "feature_importances_"):
-        print("Feature Importances:")
-        for feature, importance in zip(X.columns, model.feature_importances_):
-            print(f"{feature}: {importance:.4f}")
+    elif hasattr(model, "feature_importance_"):
+         print("Feature Importances:")
 
     predictions = model.predict(X_test)
 
     accuracy = accuracy_score(y_test, predictions)
+
+
+
+
 
     print("Accuracy:", accuracy)
 
@@ -72,6 +74,9 @@ for model_name, model in models.items():
     print()
     print("Classification Report:")
     print(classification_report(y_test, predictions))
+
+MODEL_DIR = "models"
+MODEL_FILE = "models/win_predictor_15min.pkl"
 
 best_model = LogisticRegression(max_iter=1000)
 best_model.fit(X, y)

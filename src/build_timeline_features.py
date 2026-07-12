@@ -2,6 +2,7 @@ import json
 import os
 import pandas as pd
 
+
 RAW_DATA_DIR = "data/raw"
 PROCESSED_DATA_DIR = "data/processed"
 OUTPUT_FILE = "data/processed/timeline_15_features.csv"
