@@ -4,12 +4,12 @@ import joblib
 import pandas as pd
 import streamlit as st
 
-PROJECT_ROOT = Path(__file__).resolve().partens[1]
-MODEL_FILE = PROJECT_ROOT / "models" / "win_predictor_15min.pk1"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MODEL_FILE = PROJECT_ROOT / "models" / "win_predictor_15min.pkl"
 
 model = joblib.load(MODEL_FILE)
 
-st.set_pge_config(
+st.set_page_config(
     page_title="League Win Predictor",
     page_icon="⚔️",
     layout="centered"
@@ -86,7 +86,7 @@ if st.button("Predict winner", use_container_width=True):
 
     with col1:
         st.metric(
-            "Blue Team"
+            "Blue Team",
             f"{win_probability:.1%}"
         )
 
@@ -99,7 +99,7 @@ if st.button("Predict winner", use_container_width=True):
     st.progress(float(win_probability))
 
     if win_probability >= 0.5:
-        st.successs("Blue Team is predicted to win.")
+        st.success("Blue Team is predicted to win.")
     else:
         st.error("Red Team is predicted to win.")
     if 0.45 <= win_probability <= 0.55:
