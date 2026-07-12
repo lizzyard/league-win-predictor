@@ -18,7 +18,11 @@ X = df[
     [
         "gold_diff_15",
         "xp_diff_15",
-        "cs_diff_15"
+        "cs_diff_15",
+        "kill_diff_15",
+        "tower_diff_15",
+        "dragon_diff_15",
+        "herald_diff_15",
         
     ]
 ]

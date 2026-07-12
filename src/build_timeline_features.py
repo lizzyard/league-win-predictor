@@ -44,10 +44,52 @@ def extract_15_min_features(timeline_data, match_data):
         },
     }
 
+    team_events = {
+        100: {
+            "kills": 0,
+            "towers": 0,
+            "dragons": 0,
+            "heralds": 0,
+        },
+        200: {
+            "kills": 0,
+            "towers": 0,
+            "dragons": 0,
+            "heralds": 0,
+        },
+    }
+
     participants = match_data["info"]["participants"]
 
     wins = [player["win"] for player in participants]
 
+    for current_frame in frames[: TARGET_MINUTE]:
+        for event in current_frame.get("events", []):
+            event_type = event.get("type")
+
+            if event_type == "CHAMPION_KILL":
+                killer_id = event.get("killerId", 0)
+
+                if killer_id:
+                    killer = participants[killer_id - 1]
+                    killer_team_id = killer["teamId"]
+                    team_events[killer_team_id]["kills"] += 1
+            
+            elif event_type == "BUILDING_KILL":
+                building_type = event.get("buildingType")
+
+                if building_type == "TOWER_BUILDING":
+                    killer_team_id = event.get("teamId")
+
+                    scoring_team_id = event.get("killerteamID")
+                    monster_type = event.get("monsterType")
+
+                    if killer_team_id not in team_events:
+                        continue
+                    if monster_type == "DRAGON":
+                        team_events[killer_team_id]["dragons"] += 1
+                    elif monster_type == "RIFTHERALD":
+                        team_events[killer_team_id]["heralds"] += 1
 
     if wins.count(True) != 5:
         print(f"Skipping {match_id}: invalid win data")
@@ -72,6 +114,10 @@ def extract_15_min_features(timeline_data, match_data):
     blue = teams[100]
     red = teams[200]
 
+    blue_events = team_events[100]
+    red_events = team_events[200]    
+
+
     return [
         {
             "match_id": match_id,
@@ -79,6 +125,10 @@ def extract_15_min_features(timeline_data, match_data):
             "gold_diff_15": blue["gold"] - red["gold"],
             "xp_diff_15": blue["xp"] - red["xp"],
             "cs_diff_15": blue["cs"] - red["cs"],
+            "kill_diff_15": blue_events["kills"] - red_events["kills"],
+            "tower_diff_15": blue_events["towers"] - red_events["towers"],
+            "dragon_diff_15": blue_events["dragons"] - red_events["dragons"],
+            "herald_diff_15": blue_events["heralds"] - red_events["heralds"],
             "win": blue["win"],
         },
         {
@@ -87,9 +137,16 @@ def extract_15_min_features(timeline_data, match_data):
             "gold_diff_15": red["gold"] - blue["gold"],
             "xp_diff_15": red["xp"] - blue["xp"],
             "cs_diff_15": red["cs"] - blue["cs"],
+            "kill_diff_15": red_events["kills"] - blue_events["kills"],
+            "tower_diff_15": red_events["towers"] - blue_events["towers"],
+            "dragon_diff_15": red_events["dragons"] - blue_events["dragons"],
+            "herald_diff_15": red_events["heralds"] - blue_events["heralds"],
             "win": red["win"],
         },
     ]
+
+
+
 
 def main():
     all_rows = []
