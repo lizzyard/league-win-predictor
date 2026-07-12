@@ -1,19 +1,71 @@
+from pathlib import Path 
+
 import joblib
 import pandas as pd
 import streamlit as st
 
-MODEL_FILE = "models/win_predictor_15min.pkl"
+PROJECT_ROOT = Path(__file__).resolve().partens[1]
+MODEL_FILE = PROJECT_ROOT / "models" / "win_predictor_15min.pk1"
+
+model = joblib.load(MODEL_FILE)
+
+st.set_pge_config(
+    page_title="League Win Predictor",
+    page_icon="⚔️",
+    layout="centered"
+
+)
 
 model = joblib.load(MODEL_FILE)
 
 st.title("League of Legends Win Predictor")
-st.write("Predict win probability from 15-minute game state.")
+st.write(
+    "Estimate Blue Team's chance of winning based on the game state "
+    "at 15 minutes."
+    )
 
-gold_diff = st.number_input("Gold Difference at 15 min", value=0)
-xp_diff = st.number_input("XP Difference at 15 min", value = 0)
-cs_diff = st.number_input("CS Difference at 15 min", value=0)
+with st.sidebar:
+    st.header("How to enter values")
+    st.write(
+        "Enter Blue Team's stat minus Red team's stat."
+    )
 
-if st.button("Predict"):
+    st.write("Example:")
+    st.code(
+        """
+    Blue gold: 27,500
+    Red gold: 25,000
+    
+    Gold difference = 2,500 
+        """
+    )
+
+
+gold_diff = st.number_input(
+    "Gold Difference at 15 min",
+    min_value=-20000,
+    max_value=20000,
+    value=0,
+    step=100,
+    )
+
+xp_diff = st.number_input(
+    "XP difference at 15 minutes",
+    min_value=-20000,
+    max_value=20000,
+    value=0,
+    step=100,
+)
+
+cs_diff = st.number_input(
+    "CS difference at 15 minutes",
+    min_value=-500,
+    max_value=500,
+    value=0,
+    step=5,
+)
+
+if st.button("Predict winner", use_container_width=True):
     input_data = pd.DataFrame(
         [
             {
@@ -24,12 +76,48 @@ if st.button("Predict"):
         ]
     )
 
-    probability = model.predict_proba(input_data)[0][1]
-    prediction = model.predict(input_data)[0]
+    win_probability = model.predict_proba(input_data)[0][1]
+    loss_probability = 1 - win_probability
 
+    st.divider()
     st.subheader("Prediction")
 
-    if prediction:
-        st.success(f"Predicted Win Probability: {probability:.2%}")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Blue Team"
+            f"{win_probability:.1%}"
+        )
+
+    with col2:
+        st.metric(
+            "Red Team",
+            f"{loss_probability:.1%}",
+        )
+
+    st.progress(float(win_probability))
+
+    if win_probability >= 0.5:
+        st.successs("Blue Team is predicted to win.")
     else:
-        st.error(f"Predicted Win Probability: {probability:.2%}")
+        st.error("Red Team is predicted to win.")
+    if 0.45 <= win_probability <= 0.55:
+        st.warning(
+            "The prediction is very close, so the model is uncertain."
+        )
+
+st.caption(
+    "This model uses gold, XP, and CS differences at 15 minutes. "
+    "It is an educational prediction and not a guarenteed outcome."
+)
+
+
+
+
+    # st.subheader("Prediction")
+
+    # if prediction:
+    #     st.success(f"Predicted Win Probability: {probability:.2%}")
+    # else:
+    #     st.error(f"Predicted Win Probability: {probability:.2%}")
