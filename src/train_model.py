@@ -5,6 +5,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.tree import DecisionTreeClassifier 
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold, cross_validate
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 import os
 import joblib
 
@@ -38,10 +41,30 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 models = {
-    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "Logistic Regression": Pipeline(
+         [
+              ("Scaler", StandardScaler()),
+              ("model", LogisticRegression(max_iter=1000)),
+         ]
+    ),
+
     "Decision Tree": DecisionTreeClassifier(random_state=42),
     "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
 }
+
+cv = StratifiedKFold(
+     n_splits=5,
+     shuffle=True,
+     random_state=42,
+)
+
+scoring = [
+     "accuracy",
+     "precision",
+     "recall",
+     "f1",
+     "roc_auc",
+]
 
 for model_name, model in models.items():
     print()
@@ -49,9 +72,22 @@ for model_name, model in models.items():
     print(model_name)
     print("=" * 40)
 
-    model.fit(X_train, y_train)
+    cv_results = cross_validate(
+         model,
+         X,
+         y,
+         cv=cv,
+         scoring=scoring,
+    )
 
-    print()
+    print("Cross-validation results:")
+    print(f"Accuracy:  {cv_results['test_accuracy'].mean():.3f}")
+    print(f"Precision: {cv_results['test_precision'].mean():.3f}")
+    print(f"Recall:    {cv_results['test_recall'].mean():.3f}")
+    print(f"F1 score:  {cv_results['test_f1'].mean():.3f}")
+    print(f"ROC-AUC:   {cv_results['test_roc_auc'].mean():.3f}")
+
+    model.fit(X_train, y_train)
 
     if hasattr(model, "coef_"):
         print("coefficients:")
@@ -63,19 +99,12 @@ for model_name, model in models.items():
 
     predictions = model.predict(X_test)
 
-    accuracy = accuracy_score(y_test, predictions)
-
-
-
-
-
-    print("Accuracy:", accuracy)
-
     print()
+    print("Holdout Accuracy:", accuracy_score(y_test, predictions))
+
     print("Confusion Matrix:")
     print(confusion_matrix(y_test, predictions))
 
-    print()
     print("Classification Report:")
     print(classification_report(y_test, predictions))
 
@@ -92,7 +121,12 @@ FEATURE_COLUMNS = [
 X = df[FEATURE_COLUMNS]
 y = df["win"]
 
-final_model = LogisticRegression(max_iter=1000)
+final_model = Pipeline(
+    [
+        ("scaler", StandardScaler()),
+        ("model", LogisticRegression(max_iter=1000)),
+    ]
+)
 
 final_model.fit(X, y)
 
