@@ -79,13 +79,29 @@ for model_name, model in models.items():
     print("Classification Report:")
     print(classification_report(y_test, predictions))
 
-MODEL_DIR = "models"
-MODEL_FILE = "models/win_predictor_15min.pkl"
+FEATURE_COLUMNS = [
+    "gold_diff_15",
+    "xp_diff_15",
+    "cs_diff_15",
+    "kill_diff_15",
+    "tower_diff_15",
+    "dragon_diff_15",
+    "herald_diff_15",
+]
 
-best_model = LogisticRegression(max_iter=1000)
-best_model.fit(X, y)
+X = df[FEATURE_COLUMNS]
+y = df["win"]
 
-os.makedirs(MODEL_DIR, exist_ok=True)
-joblib.dump(best_model, MODEL_FILE)
+final_model = LogisticRegression(max_iter=1000)
 
-print(f"Saved model to {MODEL_FILE}")
+final_model.fit(X, y)
+
+os.makedirs("models", exist_ok=True)
+
+joblib.dump(
+     final_model,
+     "models/win_predictor_15min.pkl"
+)
+
+print("Saved updated model to models/win_predictor_15min.pkl")
+

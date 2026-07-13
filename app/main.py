@@ -65,6 +65,38 @@ cs_diff = st.number_input(
     step=5,
 )
 
+kill_diff = st.number_input(
+    "Kill difference at 15 minutes",
+    min_value=-30,
+    max_value=30,
+    value=0,
+    step=1,
+)
+
+tower_diff = st.number_input(
+    "Tower difference at 15 minutes",
+    min_value=-10,
+    max_value=10,
+    value=0,
+    step=1,
+)
+
+dragon_diff = st.number_input(
+    "Dragon difference at 15 minutes",
+    min_value=-4,
+    max_value=4,
+    value=0,
+    step=1,
+)
+
+herald_diff = st.number_input(
+    "Rift herald difference at 15 minutes",
+    min_value=-2, 
+    max_value=2,
+    value=0,
+    step=1,
+)
+
 if st.button("Predict winner", use_container_width=True):
     input_data = pd.DataFrame(
         [
@@ -72,6 +104,10 @@ if st.button("Predict winner", use_container_width=True):
                 "gold_diff_15": gold_diff,
                 "xp_diff_15": xp_diff,
                 "cs_diff_15": cs_diff,
+                "kill_diff_15": kill_diff,
+                "tower_diff_15": tower_diff,
+                "dragon_diff_15": dragon_diff,
+                "herald_diff_15": herald_diff,
             }
         ]
     )
