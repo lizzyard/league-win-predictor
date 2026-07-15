@@ -1,5 +1,4 @@
 from pathlib import Path 
-
 import joblib
 import pandas as pd
 import streamlit as st
@@ -42,7 +41,7 @@ with st.sidebar:
 
 
 gold_diff = st.number_input(
-    "Gold Difference at 15 min",
+    "Gold Difference",
     min_value=-20000,
     max_value=20000,
     value=0,
@@ -50,7 +49,7 @@ gold_diff = st.number_input(
     )
 
 xp_diff = st.number_input(
-    "XP difference at 15 minutes",
+    "XP difference",
     min_value=-20000,
     max_value=20000,
     value=0,
@@ -58,7 +57,7 @@ xp_diff = st.number_input(
 )
 
 cs_diff = st.number_input(
-    "CS difference at 15 minutes",
+    "CS difference",
     min_value=-500,
     max_value=500,
     value=0,
@@ -66,7 +65,7 @@ cs_diff = st.number_input(
 )
 
 kill_diff = st.number_input(
-    "Kill difference at 15 minutes",
+    "Kill difference",
     min_value=-30,
     max_value=30,
     value=0,
@@ -74,7 +73,7 @@ kill_diff = st.number_input(
 )
 
 tower_diff = st.number_input(
-    "Tower difference at 15 minutes",
+    "Tower difference",
     min_value=-10,
     max_value=10,
     value=0,
@@ -82,7 +81,7 @@ tower_diff = st.number_input(
 )
 
 dragon_diff = st.number_input(
-    "Dragon difference at 15 minutes",
+    "Dragon difference",
     min_value=-4,
     max_value=4,
     value=0,
@@ -90,7 +89,7 @@ dragon_diff = st.number_input(
 )
 
 herald_diff = st.number_input(
-    "Rift herald difference at 15 minutes",
+    "Rift herald difference",
     min_value=-2, 
     max_value=2,
     value=0,
