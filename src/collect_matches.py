@@ -77,31 +77,62 @@ def save_timeline_data(match_id, timeline_data):
     print(f"Saved timeline data to {file_path}")
 
 def download_matches(match_ids):
+    os.makedirs("data/raw", exist_ok=True)
+
     for match_id in match_ids:
+        match_path = f"data/raw/{match_id}.json"
+        timeline_path = f"data/raw/{match_id}_timeline.json"
+
+        match_exists = os.path.exists(match_path)
+        timeline_exists = os.path.exists(timeline_path)
+
+        if match_exists and timeline_exists:
+            print(f"Skipping {match_id}: files already exist")
+            continue
+
         print(f"Downloading {match_id}...")
 
-        match_data = get_match_data(match_id)
-        save_match_data(match_id, match_data)
+        if not match_exists:
+            match_data = get_match_data(match_id)
+            save_match_data(match_id, match_data)
+        else:
+            print(f"Match file already exists: {match_path}")
 
-        timeline_data = get_match_timeline(match_id)
-        save_timeline_data(match_id, timeline_data)
+        if not timeline_exists:
+            timeline_data = get_match_timeline(match_id)
+            save_timeline_data(match_id, timeline_data)
+        else:
+            print(f"Timeline file already exists: {timeline_path}")
 
         time.sleep(1)
+        time.sleep(1)
 
-def riot_get(url):
-    while True:
-        response = requests.get(url, headers=headers)
+def riot_get(url, max_retries=5):
+    attempts = 0
+
+    while attempts < max_retries:
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 200:
+            return response.json()
 
         if response.status_code == 429:
             retry_after = int(response.headers.get("Retry-After", 60))
-            print(f"Rate limit hit. Waiting {retry_after} seconds...")
+            attempts += 1
+
+            print(
+                f"Rate limit hit. Waiting {retry_after} seconds "
+                f"(attempt {attempts}/{max_retries})..."
+            )
+
             time.sleep(retry_after)
             continue
 
-        if response.status_code != 200:
-            raise Exception(f"Request failed: {response.status_code} {response.json()}")
+        raise Exception(
+            f"Request failed: {response.status_code} {response.text}"
+        )
 
-        return response.json()
+    raise Exception("Maximum retry attempts reached.")
 
 
 PLAYERS = [

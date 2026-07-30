@@ -3,7 +3,7 @@ import joblib
 import pandas as pd
 import streamlit as st
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MODEL_FILE = PROJECT_ROOT / "models" / "win_predictor_15min.pkl"
 
 model = joblib.load(MODEL_FILE)
