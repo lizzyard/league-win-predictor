@@ -17,6 +17,14 @@ st.set_page_config(
 
 model = joblib.load(MODEL_FILE)
 
+feature_names = [
+    "gold_diff_15",
+    "xp_diff_15",
+    "cs_diff_15",
+]
+
+coefficients = model.named_steps["model"].coef_[0]
+
 st.title("League of Legends Win Predictor")
 st.write(
     "Estimate Blue Team's chance of winning based on the game state "
@@ -111,6 +119,7 @@ if st.button("Predict winner", use_container_width=True):
         ]
     )
 
+
     win_probability = model.predict_proba(input_data)[0][1]
     loss_probability = 1 - win_probability
 
@@ -141,6 +150,24 @@ if st.button("Predict winner", use_container_width=True):
         st.warning(
             "The prediction is very close, so the model is uncertain."
         )
+    st.subheader("Why the model predicted this")
+
+    explanations = []
+
+    for feature, value, coefficient in zip(
+        feature_names,
+        input_data.iloc[0],
+        coefficients
+    ):
+        explanations.append(
+            {
+                "Feature": feature,
+                "Input Value": value,
+                "Weight": coefficient,
+                "Contribution": value * coefficient,
+            }
+        )
+    st.dataframe(pd.DataFrame(explanations))
 
 st.caption(
     "This model uses gold, XP, and CS differences at 15 minutes. "
@@ -150,9 +177,3 @@ st.caption(
 
 
 
-    # st.subheader("Prediction")
-
-    # if prediction:
-    #     st.success(f"Predicted Win Probability: {probability:.2%}")
-    # else:
-    #     st.error(f"Predicted Win Probability: {probability:.2%}")
